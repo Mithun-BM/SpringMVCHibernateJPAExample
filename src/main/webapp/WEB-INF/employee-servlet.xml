@@ -1,0 +1,63 @@
+<?xml  version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       					   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:annotation-config /> <!-- This line is important for Spring Annotations Scanning -->
+
+	<context:component-scan base-package="com.example.controller" />  <!-- This line is important for Spring MVC Controller -->
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url"
+			value="jdbc:postgresql://localhost:5432/SpringMVCHibernateJPAdb" />
+		<property name="username" value="postgres" />
+		<property name="password" value="password@123" />
+	</bean>
+
+	<!-- OR class="org.springframework.orm.jpa.support.SharedEntityManagerBean" -->
+	<!-- EntityManagerFactory that brings together the persistence unit, datasource, 
+		and JPA Vendor -->
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+		<property name="persistenceUnitName" value="SpringMVCHibernateJPAdb" />
+		<property name="packagesToScan" value="com.example.entity" /> <!-- Usually JPA defines a persistence unit through the META-INF/persistence.xml 
+			file. -->
+		<!-- Starting with Spring 3.1, the persistence.xml is no longer necessary 
+			– the LocalContainerEntityManagerFactoryBean now supports a ‘packagesToScan’ 
+			property -->
+		<!-- where the packages to scan for @Entity classes can be specified. -->
+		<!-- <property name="persistenceXmlLocation" value="/WEB-INF/persistence.xml" 
+			/> -->
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="employeeDAO" class="com.example.dao.impl.EmployeeDaoImpl" />
+
+
+	<!-- JPA Transaction Management -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<tx:annotation-driven /> <!-- This line is important Specifying Spring Transcations is Annotations 
+		Driven -->
+</beans>
+
+
+
